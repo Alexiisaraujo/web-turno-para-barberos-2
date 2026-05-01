@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barbería Gustavo Aguirre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Cormorant+Garamond:wght@300;400;500&family=Oswald:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ========== SCREEN: LOGIN ========== -->
+<div id="screen-login" class="screen active">
+  <div class="login-bg">
+    <div class="login-ornament top-left"></div>
+    <div class="login-ornament bottom-right"></div>
+  </div>
+  <div class="login-container">
+    <div class="login-logo">
+      <div class="logo-scissors">✂</div>
+      <h1 class="login-title">Barbería</h1>
+      <h2 class="login-name">Gustavo Aguirre</h2>
+      <div class="login-divider"><span></span><span class="diamond">◆</span><span></span></div>
+      <p class="login-since">Est. Buenos Aires</p>
+    </div>
+    <div class="login-form-wrapper">
+      <div class="tab-switcher">
+        <button class="tab-btn active" onclick="switchLoginTab('login')">Ingresar</button>
+        <button class="tab-btn" onclick="switchLoginTab('register')">Registrarse</button>
+      </div>
+
+      <!-- Login -->
+      <div id="tab-login" class="tab-content active">
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" id="login-user" placeholder="Tu usuario" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="login-pass" placeholder="Tu contraseña">
+        </div>
+        <div id="login-error" class="form-error hidden"></div>
+        <button class="btn-primary" onclick="login()">Ingresar</button>
+      </div>
+
+      <!-- Register -->
+      <div id="tab-register" class="tab-content">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" id="reg-nombre" placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" id="reg-user" placeholder="Elegí un usuario" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="reg-pass" placeholder="Elegí una contraseña">
+        </div>
+        <div id="reg-error" class="form-error hidden"></div>
+        <button class="btn-primary" onclick="register()">Crear cuenta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN: ADMIN ========== -->
+<div id="screen-admin" class="screen">
+  <header class="app-header">
+    <div class="header-logo">✂ Barbería Aguirre</div>
+    <nav class="header-nav">
+      <button class="nav-btn active" onclick="adminTab('dashboard')" data-tab="dashboard">Dashboard</button>
+      <button class="nav-btn" onclick="adminTab('barberos')" data-tab="barberos">Barberos</button>
+      <button class="nav-btn" onclick="adminTab('turnos')" data-tab="turnos">Turnos</button>
+      <button class="nav-btn" onclick="adminTab('galeria')" data-tab="galeria">Galería</button>
+    </nav>
+    <button class="btn-logout" onclick="logout()">Salir</button>
+  </header>
+
+  <!-- DASHBOARD -->
+  <div id="admin-dashboard" class="panel active">
+    <div class="panel-header">
+      <h2>Dashboard</h2>
+      <span class="panel-sub">Resumen general</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value" id="stat-turnos-total">0</div>
+        <div class="stat-label">Turnos totales</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value" id="stat-ingresos">$0</div>
+        <div class="stat-label">Ingresos totales</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✂</div>
+        <div class="stat-value" id="stat-cortes">0</div>
+        <div class="stat-label">Cortes realizados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="stat-clientes">0</div>
+        <div class="stat-label">Clientes</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="card">
+        <h3 class="card-title">Ganancias por barbero</h3>
+        <div id="ganancias-barberos" class="barbero-earnings-list"></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">Turnos por día</h3>
+        <div id="turnos-por-dia" class="turnos-dia-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARBEROS -->
+  <div id="admin-barberos" class="panel">
+    <div class="panel-header">
+      <h2>Gestión de Barberos</h2>
+      <button class="btn-gold" onclick="openModal('modal-add-barbero')">+ Nuevo Barbero</button>
+    </div>
+    <div id="lista-barberos" class="barberos-grid"></div>
+  </div>
+
+  <!-- TURNOS -->
+  <div id="admin-turnos" class="panel">
+    <div class="panel-header">
+      <h2>Todos los Turnos</h2>
+      <div class="filter-row">
+        <select id="filtro-barbero-turno" onchange="renderTurnosAdmin()">
+          <option value="">Todos los barberos</option>
+        </select>
+        <input type="date" id="filtro-fecha-turno" onchange="renderTurnosAdmin()">
+      </div>
+    </div>
+    <div id="lista-turnos-admin" class="turnos-list"></div>
+  </div>
+
+  <!-- GALERÍA ADMIN -->
+  <div id="admin-galeria" class="panel">
+    <div class="panel-header">
+      <h2>Galería de Cortes</h2>
+    </div>
+    <div id="galeria-admin" class="galeria-grid"></div>
+  </div>
+</div>
+
+<!-- ========== SCREEN: BARBERO ========== -->
+<div id="screen-barbero" class="screen">
+  <header class="app-header">
+    <div class="header-logo">✂ Barbería Aguirre</div>
+    <nav class="header-nav">
+      <button class="nav-btn active" onclick="barberoTab('mis-turnos')" data-tab="mis-turnos">Mis Turnos</button>
+      <button class="nav-btn" onclick="barberoTab('subir-corte')" data-tab="subir-corte">Subir Corte</button>
+      <button class="nav-btn" onclick="barberoTab('perfil')" data-tab="perfil">Mi Perfil</button>
+    </nav>
+    <button class="btn-logout" onclick="logout()">Salir</button>
+  </header>
+
+  <!-- MIS TURNOS BARBERO -->
+  <div id="barbero-mis-turnos" class="panel active">
+    <div class="panel-header">
+      <h2 id="barbero-welcome">Bienvenido</h2>
+      <span class="panel-sub">Tus turnos de hoy</span>
+    </div>
+    <div class="mini-stats">
+      <div class="mini-stat">
+        <span id="barbero-stat-hoy">0</span>
+        <span>Turnos hoy</span>
+      </div>
+      <div class="mini-stat">
+        <span id="barbero-stat-mes">$0</span>
+        <span>Este mes</span>
+      </div>
+      <div class="mini-stat">
+        <span id="barbero-stat-total">$0</span>
+        <span>Total generado</span>
+      </div>
+    </div>
+    <div id="turnos-barbero" class="turnos-list"></div>
+  </div>
+
+  <!-- SUBIR CORTE -->
+  <div id="barbero-subir-corte" class="panel">
+    <div class="panel-header">
+      <h2>Registrar Corte</h2>
+    </div>
+    <div class="form-card">
+      <div class="form-group">
+        <label>Nombre del cliente</label>
+        <input type="text" id="corte-cliente" placeholder="Nombre del cliente">
+      </div>
+      <div class="form-group">
+        <label>Precio cobrado ($)</label>
+        <input type="number" id="corte-precio" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Foto del corte</label>
+        <div class="file-upload-area" onclick="document.getElementById('corte-foto').click()">
+          <div class="file-upload-icon">📷</div>
+          <div class="file-upload-text">Subir foto</div>
+          <img id="preview-foto" class="hidden">
+        </div>
+        <input type="file" id="corte-foto" accept="image/*" class="hidden" onchange="previewFoto(this)">
+      </div>
+      <button class="btn-primary" onclick="subirCorte()">Registrar corte</button>
+    </div>
+  </div>
+
+  <!-- PERFIL BARBERO -->
+  <div id="barbero-perfil" class="panel">
+    <div class="panel-header">
+      <h2>Mi Perfil</h2>
+    </div>
+    <div class="form-card">
+      <div class="profile-photo-area" onclick="document.getElementById('perfil-foto').click()">
+        <img id="preview-perfil" src="" alt="">
+        <div class="profile-photo-overlay">Cambiar foto</div>
+      </div>
+      <input type="file" id="perfil-foto" accept="image/*" class="hidden" onchange="previewPerfil(this)">
+      <div class="form-group">
+        <label>Nombre visible</label>
+        <input type="text" id="perfil-nombre" placeholder="Tu nombre">
+      </div>
+      <div class="form-group">
+        <label>Instagram</label>
+        <input type="text" id="perfil-instagram" placeholder="@tuusuario">
+      </div>
+      <div class="form-group">
+        <label>TikTok</label>
+        <input type="text" id="perfil-tiktok" placeholder="@tuusuario">
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="perfil-bio" placeholder="Contá algo sobre vos..." rows="3"></textarea>
+      </div>
+      <button class="btn-primary" onclick="guardarPerfil()">Guardar perfil</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN: CLIENTE ========== -->
+<div id="screen-cliente" class="screen">
+  <header class="app-header">
+    <div class="header-logo">✂ Barbería Aguirre</div>
+    <nav class="header-nav">
+      <button class="nav-btn active" onclick="clienteTab('reservar')" data-tab="reservar">Reservar</button>
+      <button class="nav-btn" onclick="clienteTab('mis-turnos')" data-tab="mis-turnos">Mis Turnos</button>
+      <button class="nav-btn" onclick="clienteTab('galeria')" data-tab="galeria">Galería</button>
+    </nav>
+    <button class="btn-logout" onclick="logout()">Salir</button>
+  </header>
+
+  <!-- RESERVAR -->
+  <div id="cliente-reservar" class="panel active">
+    <div class="panel-header">
+      <h2 id="cliente-welcome">Reservar turno</h2>
+    </div>
+    <div class="form-card">
+      <div class="barberos-cards-select" id="barberos-cards-select"></div>
+      <div id="horarios-section" class="hidden">
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="turno-fecha" onchange="cargarHorariosDisponibles()">
+        </div>
+        <div class="form-group">
+          <label>Horario disponible</label>
+          <select id="horarios-disponibles">
+            <option value="">Seleccioná primero una fecha</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="reservarTurno()">Confirmar turno</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIS TURNOS CLIENTE -->
+  <div id="cliente-mis-turnos" class="panel">
+    <div class="panel-header">
+      <h2>Mis Turnos</h2>
+    </div>
+    <div id="mis-turnos-cliente" class="turnos-list"></div>
+  </div>
+
+  <!-- GALERÍA CLIENTE -->
+  <div id="cliente-galeria" class="panel">
+    <div class="panel-header">
+      <h2>Galería</h2>
+      <span class="panel-sub">Trabajos de nuestros barberos</span>
+    </div>
+    <div id="galeria-cliente" class="galeria-grid"></div>
+  </div>
+</div>
+
+<!-- ========== MODAL: AGREGAR BARBERO ========== -->
+<div id="modal-add-barbero" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Nuevo Barbero</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-barbero')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre completo</label>
+      <input type="text" id="new-barbero-nombre" placeholder="Nombre del barbero">
+    </div>
+    <div class="form-group">
+      <label>Usuario</label>
+      <input type="text" id="new-barbero-user" placeholder="Usuario para login" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="new-barbero-pass" placeholder="Contraseña">
+    </div>
+    <div class="form-group">
+      <label>Instagram (opcional)</label>
+      <input type="text" id="new-barbero-ig" placeholder="@usuario">
+    </div>
+    <div class="form-group horario-row">
+      <div>
+        <label>Hora inicio</label>
+        <input type="time" id="new-barbero-inicio" value="09:00">
+      </div>
+      <div>
+        <label>Hora fin</label>
+        <input type="time" id="new-barbero-fin" value="18:00">
+      </div>
+    </div>
+    <div id="modal-barbero-error" class="form-error hidden"></div>
+    <button class="btn-primary" onclick="agregarBarbero()">Crear barbero</button>
+  </div>
+</div>
+
+<!-- ========== MODAL: EDITAR BARBERO ========== -->
+<div id="modal-edit-barbero" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Editar Barbero</h3>
+      <button class="modal-close" onclick="closeModal('modal-edit-barbero')">✕</button>
+    </div>
+    <input type="hidden" id="edit-barbero-id">
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" id="edit-barbero-nombre" placeholder="Nombre">
+    </div>
+    <div class="form-group">
+      <label>Instagram</label>
+      <input type="text" id="edit-barbero-ig" placeholder="@usuario">
+    </div>
+    <div class="form-group horario-row">
+      <div>
+        <label>Hora inicio</label>
+        <input type="time" id="edit-barbero-inicio">
+      </div>
+      <div>
+        <label>Hora fin</label>
+        <input type="time" id="edit-barbero-fin">
+      </div>
+    </div>
+    <button class="btn-primary" onclick="editarBarbero()">Guardar cambios</button>
+  </div>
+</div>
+
+<!-- ========== TOAST ========== -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
