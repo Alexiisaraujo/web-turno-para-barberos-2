@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BarberPro — Sistema de Turnos</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     PANTALLA INICIO — Landing cinematográfica
+══════════════════════════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+
+  <!-- Fondo: slideshow de trabajos -->
+  <div class="landing-bg" id="landing-bg">
+    <!-- Las slides se generan por JS con imágenes placeholder que se reemplazan con fotos reales -->
+    <div class="bg-slide active" style="background-image: url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1600&q=80')"></div>
+    <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=1600&q=80')"></div>
+    <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=1600&q=80')"></div>
+    <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1600&q=80')"></div>
+    <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1512690459411-b9245aed614b?w=1600&q=80')"></div>
+    <div class="bg-overlay"></div>
+  </div>
+
+  <!-- Barra superior: Logo + Botones esquina -->
+  <header class="landing-header">
+    <div class="landing-logo">
+      <span class="logo-scissor">✂</span>
+      <span class="logo-text">BARBER<em>PRO</em></span>
+    </div>
+    <div class="landing-header-actions">
+      <button class="btn-outline-gold" onclick="openLoginModal()">Iniciar sesión</button>
+      <button class="btn-gold" onclick="showScreen('screen-register')">Registrarse</button>
+    </div>
+  </header>
+
+  <!-- Contenido central -->
+  <main class="landing-main">
+    <div class="landing-tag">✂ BARBERÍA PREMIUM</div>
+    <h1 class="landing-title">
+      EL MEJOR<br>
+      <span>CORTE</span><br>
+      DE TU VIDA
+    </h1>
+    <p class="landing-desc">Elegí tu barbero, mirá sus trabajos y sacá turno en segundos.</p>
+    <button class="btn-cta" onclick="showScreen('screen-client-home')">
+      <span>Sacar turno ahora</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </main>
+
+  <!-- Barberos — strip inferior deslizable -->
+  <section class="barbers-strip">
+    <div class="strip-label">NUESTROS BARBEROS</div>
+    <div class="barbers-strip-track" id="barbers-strip-track">
+      <!-- generado por JS -->
+    </div>
+  </section>
+
+  <!-- Indicadores del slideshow -->
+  <div class="slide-indicators" id="slide-indicators">
+    <button class="dot active" onclick="goSlide(0)"></button>
+    <button class="dot" onclick="goSlide(1)"></button>
+    <button class="dot" onclick="goSlide(2)"></button>
+    <button class="dot" onclick="goSlide(3)"></button>
+    <button class="dot" onclick="goSlide(4)"></button>
+  </div>
+
+</div><!-- /screen-home -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL LOGIN UNIFICADO
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="login-overlay" onclick="closeLoginModal()"></div>
+<div class="modal-login hidden" id="modal-login">
+  <button class="modal-close" onclick="closeLoginModal()">✕</button>
+  <div class="login-brand">
+    <span class="logo-scissor-sm">✂</span>
+    <span>BARBERPRO</span>
+  </div>
+  <h2 class="login-title">Iniciar sesión</h2>
+  <p class="login-sub">Ingresá con tu usuario y contraseña</p>
+
+  <div class="field-group">
+    <label>Usuario</label>
+    <input type="text" id="login-user" placeholder="tu usuario" autocomplete="username" />
+  </div>
+  <div class="field-group">
+    <label>Contraseña</label>
+    <div class="pass-wrap">
+      <input type="password" id="login-pass" placeholder="••••••" autocomplete="current-password" />
+      <button class="pass-toggle" onclick="togglePass()" tabindex="-1">👁</button>
+    </div>
+  </div>
+
+  <p class="login-error hidden" id="login-error">Usuario o contraseña incorrectos</p>
+
+  <button class="btn-primary full" onclick="doLogin()">Entrar</button>
+
+  <div class="login-divider"><span>¿No tenés cuenta?</span></div>
+  <button class="btn-ghost full" onclick="closeLoginModal(); showScreen('screen-register')">Crear cuenta gratis</button>
+
+  <!-- Hint de demo -->
+  <div class="login-hints">
+    <p>Demo — usuarios de prueba:</p>
+    <code>admin / admin123</code> &nbsp;·&nbsp;
+    <code>lucas / barber1</code> &nbsp;·&nbsp;
+    <code>cliente1 / 1234</code>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     REGISTRO CLIENTE
+══════════════════════════════════════════════════════ -->
+<div id="screen-register" class="screen">
+  <div class="auth-bg">
+    <div class="auth-bg-img" style="background-image:url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1200&q=80')"></div>
+    <div class="auth-bg-overlay"></div>
+  </div>
+  <div class="auth-wrap">
+    <button class="btn-back" onclick="showScreen('screen-home')">← Volver</button>
+    <div class="login-box">
+      <div class="login-brand">
+        <span class="logo-scissor-sm">✂</span>
+        <span>BARBERPRO</span>
+      </div>
+      <h2 class="login-title">Crear cuenta</h2>
+      <p class="login-sub">Registrate para sacar turnos y ver el historial</p>
+
+      <div class="fields-row">
+        <div class="field-group">
+          <label>Nombre</label>
+          <input type="text" id="reg-name" placeholder="Tu nombre" />
+        </div>
+        <div class="field-group">
+          <label>Apellido</label>
+          <input type="text" id="reg-lastname" placeholder="Tu apellido" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Teléfono (para confirmación WhatsApp)</label>
+        <div class="phone-wrap">
+          <span class="phone-prefix">🇦🇷 +54</span>
+          <input type="tel" id="reg-phone" placeholder="9 11 1234-5678" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Usuario</label>
+        <input type="text" id="reg-user" placeholder="elegí un usuario" />
+      </div>
+      <div class="field-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-pass" placeholder="••••••" />
+      </div>
+
+      <p class="login-error hidden" id="reg-error">Completá todos los campos</p>
+
+      <!-- Paso de verificación WhatsApp (aparece tras completar form) -->
+      <div class="whatsapp-verify hidden" id="wa-verify-block">
+        <div class="wa-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </div>
+        <p>Te vamos a enviar un código por WhatsApp para confirmar tu número.</p>
+        <div class="field-group">
+          <label>Código de verificación</label>
+          <input type="text" id="wa-code" placeholder="123456" maxlength="6" />
+        </div>
+        <button class="btn-ghost small" onclick="sendWACode()">Reenviar código</button>
+      </div>
+
+      <button class="btn-primary full" id="btn-register" onclick="registerClient()">Crear cuenta</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL ADMINISTRADOR
+══════════════════════════════════════════════════════ -->
+<div id="screen-admin" class="screen">
+  <aside class="sidebar" id="admin-sidebar">
+    <div class="sidebar-logo">✂ <span>BARBERPRO</span></div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-panel="panel-dashboard" onclick="adminNav(this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" data-panel="panel-barbers" onclick="adminNav(this)">
+        <span class="nav-icon">✂</span> Barberos
+      </button>
+      <button class="nav-item" data-panel="panel-turnos" onclick="adminNav(this)">
+        <span class="nav-icon">📅</span> Turnos
+      </button>
+      <button class="nav-item" data-panel="panel-precios" onclick="adminNav(this)">
+        <span class="nav-icon">💰</span> Precios
+      </button>
+      <button class="nav-item" data-panel="panel-contabilidad" onclick="adminNav(this)">
+        <span class="nav-icon">📈</span> Contabilidad
+      </button>
+    </nav>
+    <button class="nav-item logout" onclick="logout()">
+      <span class="nav-icon">🚪</span> Salir
+    </button>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- PANEL: Dashboard -->
+    <div id="panel-dashboard" class="admin-panel active">
+      <h2 class="panel-title">Dashboard <span class="panel-sub">Resumen del día</span></h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-turnos">0</div>
+          <div class="stat-label">Turnos hoy</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-num" id="stat-recaudado">$0</div>
+          <div class="stat-label">Recaudado hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-barberos-activos">0</div>
+          <div class="stat-label">Barberos activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-clientes">0</div>
+          <div class="stat-label">Clientes registrados</div>
+        </div>
+      </div>
+      <div class="dashboard-bottom">
+        <div class="dash-section">
+          <h3>Últimos turnos completados</h3>
+          <div class="table-wrap">
+            <table class="data-table" id="table-last-turnos">
+              <thead>
+                <tr><th>Cliente</th><th>Barbero</th><th>Servicio</th><th>Precio</th><th>Estado</th></tr>
+              </thead>
+              <tbody id="tbody-last-turnos">
+                <tr><td colspan="5" class="empty">Sin turnos aún</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: Barberos -->
+    <div id="panel-barbers" class="admin-panel">
+      <h2 class="panel-title">Barberos <span class="panel-sub">Gestión del equipo</span></h2>
+      <button class="btn-primary" onclick="openModal('modal-new-barber')">+ Nuevo barbero</button>
+      <div class="barbers-list" id="barbers-list">
+        <!-- generado por JS -->
+      </div>
+    </div>
+
+    <!-- PANEL: Turnos -->
+    <div id="panel-turnos" class="admin-panel">
+      <h2 class="panel-title">Turnos <span class="panel-sub">Todos los turnos</span></h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Barbero</th><th>Servicio</th><th>Estado</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="tbody-all-turnos">
+            <tr><td colspan="7" class="empty">Sin turnos registrados</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL: Precios -->
+    <div id="panel-precios" class="admin-panel">
+      <h2 class="panel-title">Precios <span class="panel-sub">Servicios</span></h2>
+      <button class="btn-primary" onclick="openModal('modal-new-service')">+ Nuevo servicio</button>
+      <div class="table-wrap" style="margin-top:1.5rem">
+        <table class="data-table">
+          <thead>
+            <tr><th>Servicio</th><th>Precio</th><th>% Barbero</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="tbody-services">
+            <tr><td colspan="4" class="empty">Sin servicios</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL: Contabilidad -->
+    <div id="panel-contabilidad" class="admin-panel">
+      <h2 class="panel-title">Contabilidad <span class="panel-sub">Resumen financiero</span></h2>
+      <div class="stats-grid">
+        <div class="stat-card gold">
+          <div class="stat-num" id="cont-total">$0</div>
+          <div class="stat-label">Ingresos totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="cont-barberos">$0</div>
+          <div class="stat-label">Pagado a barberos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="cont-neto">$0</div>
+          <div class="stat-label">Ganancia neta</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /screen-admin -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL BARBERO
+══════════════════════════════════════════════════════ -->
+<div id="screen-barber" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo">✂ <span>BARBERPRO</span></div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-panel="bp-perfil" onclick="barberNav(this)">
+        <span class="nav-icon">👤</span> Mi Perfil
+      </button>
+      <button class="nav-item" data-panel="bp-turnos" onclick="barberNav(this)">
+        <span class="nav-icon">📅</span> Mis Turnos
+      </button>
+      <button class="nav-item" data-panel="bp-trabajos" onclick="barberNav(this)">
+        <span class="nav-icon">📸</span> Mis Trabajos
+      </button>
+      <button class="nav-item" data-panel="bp-ganancias" onclick="barberNav(this)">
+        <span class="nav-icon">💰</span> Ganancias
+      </button>
+    </nav>
+    <button class="nav-item logout" onclick="logout()">
+      <span class="nav-icon">🚪</span> Salir
+    </button>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- Perfil barbero -->
+    <div id="bp-perfil" class="admin-panel active">
+      <h2 class="panel-title">Mi Perfil</h2>
+      <div class="perfil-card">
+        <div class="perfil-avatar" id="barber-avatar-preview">✂</div>
+        <div class="perfil-info">
+          <h3 id="barber-display-name">Nombre Barbero</h3>
+          <p id="barber-display-ig">@instagram</p>
+        </div>
+      </div>
+      <div class="profile-form">
+        <div class="field-group">
+          <label>Nombre completo</label>
+          <input type="text" id="bp-name" placeholder="Tu nombre" />
+        </div>
+        <div class="field-group">
+          <label>Instagram</label>
+          <input type="text" id="bp-ig" placeholder="@tu_ig" />
+        </div>
+        <div class="field-group">
+          <label>Especialidad</label>
+          <input type="text" id="bp-esp" placeholder="Cortes clásicos, fade, etc." />
+        </div>
+        <div class="field-group">
+          <label>Días de trabajo</label>
+          <div class="days-check">
+            <label><input type="checkbox" value="Lun" /> Lun</label>
+            <label><input type="checkbox" value="Mar" /> Mar</label>
+            <label><input type="checkbox" value="Mié" /> Mié</label>
+            <label><input type="checkbox" value="Jue" /> Jue</label>
+            <label><input type="checkbox" value="Vie" /> Vie</label>
+            <label><input type="checkbox" value="Sáb" /> Sáb</label>
+            <label><input type="checkbox" value="Dom" /> Dom</label>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveBarberProfile()">Guardar cambios</button>
+      </div>
+    </div>
+
+    <!-- Turnos barbero -->
+    <div id="bp-turnos" class="admin-panel">
+      <h2 class="panel-title">Mis Turnos</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Estado</th></tr>
+          </thead>
+          <tbody id="tbody-barber-turnos">
+            <tr><td colspan="5" class="empty">Sin turnos</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Trabajos del barbero -->
+    <div id="bp-trabajos" class="admin-panel">
+      <h2 class="panel-title">Mis Trabajos <span class="panel-sub">Portfolio</span></h2>
+      <div class="upload-area" onclick="document.getElementById('upload-work').click()">
+        <input type="file" id="upload-work" accept="image/*" hidden onchange="previewWork(event)" />
+        <div class="upload-icon">📸</div>
+        <p>Hacé clic para subir una foto de un trabajo</p>
+        <small>JPG, PNG, WEBP — máx. 5MB</small>
+      </div>
+      <div class="works-grid" id="works-grid"></div>
+    </div>
+
+    <!-- Ganancias del barbero -->
+    <div id="bp-ganancias" class="admin-panel">
+      <h2 class="panel-title">Mis Ganancias</h2>
+      <div class="stats-grid small">
+        <div class="stat-card gold">
+          <div class="stat-num" id="barber-total-ganado">$0</div>
+          <div class="stat-label">Total acumulado</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="barber-total-cortes">0</div>
+          <div class="stat-label">Cortes realizados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="barber-hoy-ganado">$0</div>
+          <div class="stat-label">Ganado hoy</div>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:2rem">
+        <table class="data-table">
+          <thead>
+            <tr><th>Servicio</th><th>Cliente</th><th>Precio total</th><th>Tu parte</th><th>Fecha</th></tr>
+          </thead>
+          <tbody id="tbody-barber-ganancias">
+            <tr><td colspan="5" class="empty">Sin cortes registrados aún</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /screen-barber -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL CLIENTE — Ver barberos y sacar turno
+══════════════════════════════════════════════════════ -->
+<div id="screen-client-home" class="screen">
+  <div class="client-wrap">
+    <button class="btn-back" onclick="showScreen('screen-home')">← Volver</button>
+
+    <header class="client-header">
+      <h1>✂ Reservá tu turno</h1>
+      <p>Elegí barbero, servicio y horario</p>
+    </header>
+
+    <!-- Paso 1: elegir barbero — cards grandes con trabajos -->
+    <section class="client-step" id="step-barber">
+      <h3>1. Elegí tu barbero</h3>
+      <div class="barber-cards-big" id="barber-cards">
+        <!-- generado por JS -->
+      </div>
+    </section>
+
+    <!-- Paso 2: servicio -->
+    <section class="client-step hidden" id="step-service">
+      <h3>2. Elegí el servicio</h3>
+      <div class="service-list" id="service-list"></div>
+      <button class="btn-ghost" onclick="resetStep('step-barber','step-service')">← Cambiar barbero</button>
+    </section>
+
+    <!-- Paso 3: fecha y hora -->
+    <section class="client-step hidden" id="step-datetime">
+      <h3>3. Elegí fecha y hora</h3>
+      <div class="fields-row">
+        <div class="field-group">
+          <label>Fecha</label>
+          <input type="date" id="client-fecha" />
+        </div>
+        <div class="field-group">
+          <label>Hora</label>
+          <input type="time" id="client-hora" />
+        </div>
+      </div>
+      <button class="btn-ghost" onclick="resetStep('step-service','step-datetime')">← Cambiar servicio</button>
+      <button class="btn-primary" onclick="goToStepData()">Continuar →</button>
+    </section>
+
+    <!-- Paso 4: datos del cliente -->
+    <section class="client-step hidden" id="step-datos">
+      <h3>4. Tus datos</h3>
+      <div class="field-group">
+        <label>Nombre completo</label>
+        <input type="text" id="client-nombre" placeholder="Juan Pérez" />
+      </div>
+      <div class="field-group">
+        <label>Teléfono WhatsApp</label>
+        <div class="phone-wrap">
+          <span class="phone-prefix">🇦🇷 +54</span>
+          <input type="tel" id="client-tel" placeholder="9 11 1234-5678" />
+        </div>
+        <small style="color:var(--gray-light);font-size:0.75rem">Recibís confirmación por WhatsApp</small>
+      </div>
+      <button class="btn-ghost" onclick="resetStep('step-datetime','step-datos')">← Cambiar horario</button>
+      <button class="btn-primary" onclick="confirmarTurno()">Confirmar turno ✓</button>
+    </section>
+
+    <!-- Confirmación -->
+    <section class="client-step hidden" id="step-ok">
+      <div class="confirm-ok">
+        <div class="confirm-check">✓</div>
+        <h2>¡Turno reservado!</h2>
+        <div class="confirm-detail" id="confirm-detail"></div>
+        <div class="wa-confirm-note">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span>Te enviamos la confirmación por WhatsApp</span>
+        </div>
+        <button class="btn-primary" onclick="showScreen('screen-home')">Volver al inicio</button>
+      </div>
+    </section>
+
+  </div>
+</div><!-- /screen-client-home -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: Ver barbero (desde landing — sacar turno)
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="barber-modal-overlay" onclick="closeBarberModal()"></div>
+<div class="modal-barber-view hidden" id="modal-barber-view">
+  <button class="modal-close" onclick="closeBarberModal()">✕</button>
+  <div class="mbv-header">
+    <div class="mbv-avatar" id="mbv-avatar">✂</div>
+    <div class="mbv-info">
+      <h2 id="mbv-name">Nombre Barbero</h2>
+      <p id="mbv-ig">@instagram</p>
+      <p id="mbv-esp" class="mbv-esp"></p>
+    </div>
+  </div>
+  <div class="mbv-works" id="mbv-works">
+    <!-- fotos del barbero -->
+  </div>
+  <div class="mbv-actions">
+    <button class="btn-cta full" onclick="goBookFromBarber()">
+      <span>Sacar turno con este barbero</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODALES ADMIN
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModals()"></div>
+
+<!-- Modal: Nuevo barbero -->
+<div class="modal hidden" id="modal-new-barber">
+  <div class="modal-header">
+    <h3>Nuevo barbero</h3>
+    <button onclick="closeModals()">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="field-group">
+      <label>Nombre completo</label>
+      <input type="text" id="nb-name" placeholder="Nombre del barbero" />
+    </div>
+    <div class="fields-row">
+      <div class="field-group">
+        <label>Usuario</label>
+        <input type="text" id="nb-user" placeholder="usuario" />
+      </div>
+      <div class="field-group">
+        <label>Contraseña</label>
+        <input type="password" id="nb-pass" placeholder="••••••" />
+      </div>
+    </div>
+    <p class="login-error hidden" id="nb-error">Completá todos los campos</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-ghost" onclick="closeModals()">Cancelar</button>
+    <button class="btn-primary" onclick="createBarber()">Crear barbero</button>
+  </div>
+</div>
+
+<!-- Modal: Nuevo servicio -->
+<div class="modal hidden" id="modal-new-service">
+  <div class="modal-header">
+    <h3>Nuevo servicio</h3>
+    <button onclick="closeModals()">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="field-group">
+      <label>Nombre del servicio</label>
+      <input type="text" id="ns-name" placeholder="Ej: Corte + barba" />
+    </div>
+    <div class="fields-row">
+      <div class="field-group">
+        <label>Precio ($)</label>
+        <input type="number" id="ns-price" placeholder="2500" min="0" />
+      </div>
+      <div class="field-group">
+        <label>% para el barbero</label>
+        <input type="number" id="ns-pct" placeholder="50" min="0" max="100" />
+      </div>
+    </div>
+    <p class="login-error hidden" id="ns-error">Completá todos los campos</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-ghost" onclick="closeModals()">Cancelar</button>
+    <button class="btn-primary" onclick="createService()">Guardar servicio</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     ESTILOS LANDING (se agregan inline para no romper style.css)
+══════════════════════════════════════════════════════ -->
+<style>
+/* ─── LANDING ──────────────────────────────────────── */
+#screen-home {
+  position: relative;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.landing-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.bg-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  transform: scale(1.05);
+  animation: kenburns 8s ease-in-out infinite alternate;
+}
+
+.bg-slide.active { opacity: 1; }
+
+@keyframes kenburns {
+  from { transform: scale(1.05) translate(0, 0); }
+  to   { transform: scale(1.12) translate(-1%, -1%); }
+}
+
+.bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.55) 60%, rgba(10,10,10,0.2) 100%),
+    linear-gradient(to top, rgba(10,10,10,0.95) 0%, transparent 50%);
+}
+
+/* Header landing */
+.landing-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.75rem 3rem;
+}
+
+.landing-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+  color: var(--white);
+}
+
+.logo-scissor {
+  color: var(--gold);
+  font-size: 1.4rem;
+  filter: drop-shadow(0 0 12px rgba(201,168,76,0.6));
+}
+
+.landing-logo em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.landing-header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Main hero */
+.landing-main {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 3rem 1rem;
+  max-width: 680px;
+}
+
+.landing-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.landing-tag::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--gold-dim);
+}
+
+.landing-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 9vw, 8rem);
+  line-height: 0.92;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+}
+
+.landing-title span {
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(201,168,76,0.4);
+}
+
+.landing-desc {
+  font-size: 1rem;
+  color: var(--white-dim);
+  margin-bottom: 2.5rem;
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+/* Botones landing */
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--gold);
+  color: var(--black);
+  border: none;
+  border-radius: var(--radius);
+  padding: 1rem 2rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: var(--transition);
+  width: fit-content;
+}
+
+.btn-cta:hover {
+  background: var(--gold-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(201,168,76,0.4);
+}
+
+.btn-cta.full { width: 100%; justify-content: center; }
+
+.btn-outline-gold {
+  background: transparent;
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: var(--radius);
+  padding: 0.6rem 1.25rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-outline-gold:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--black);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.6rem 1.25rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-gold:hover { background: var(--gold-light); }
+
+/* Strip de barberos */
+.barbers-strip {
+  position: relative;
+  z-index: 10;
+  padding: 0 3rem 2rem;
+}
+
+.strip-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 0.85rem;
+}
+
+.barbers-strip-track {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+
+.barbers-strip-track::-webkit-scrollbar { display: none; }
+
+.strip-barber-card {
+  flex-shrink: 0;
+  width: 140px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+}
+
+.strip-barber-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+}
+
+.strip-barber-img {
+  width: 100%;
+  height: 90px;
+  background: var(--black-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  object-fit: cover;
+}
+
+.strip-barber-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.strip-barber-info {
+  padding: 0.6rem 0.75rem;
+}
+
+.strip-barber-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 0.15rem;
+}
+
+.strip-barber-ig {
+  font-size: 0.7rem;
+  color: var(--gold-dim);
+}
+
+/* Dots */
+.slide-indicators {
+  position: absolute;
+  bottom: 10rem;
+  right: 3rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dot {
+  width: 4px;
+  height: 24px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.25);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dot.active {
+  background: var(--gold);
+  height: 36px;
+}
+
+/* ─── MODAL LOGIN ──────────────────────────────────── */
+.modal-login {
+  position: fixed;
+  top: 50%;
+  right: 3rem;
+  transform: translateY(-50%);
+  z-index: 300;
+  background: rgba(17,17,17,0.97);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: var(--radius-lg);
+  width: min(400px, 92vw);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+  backdrop-filter: blur(20px);
+  animation: slideInRight 0.35s cubic-bezier(0.34,1.2,0.64,1);
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateY(-50%) translateX(30px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--gray-light);
+  font-size: 0.9rem;
+  cursor: pointer;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+.modal-close:hover { background: var(--black-4); color: var(--white); }
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+.logo-scissor-sm { font-size: 1rem; }
+
+.login-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: -0.4rem;
+}
+
+.login-sub {
+  font-size: 0.8rem;
+  color: var(--gray-light);
+}
+
+.pass-wrap {
+  position: relative;
+}
+
+.pass-wrap input { width: 100%; padding-right: 3rem; }
+
+.pass-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.5;
+  transition: opacity var(--transition);
+}
+.pass-toggle:hover { opacity: 1; }
+
+.btn-primary.full,
+.btn-ghost.full {
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-ghost.small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.78rem;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.25rem 0;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--black-5);
+}
+.login-divider span {
+  font-size: 0.75rem;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+.login-hints {
+  background: var(--black-3);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.72rem;
+  color: var(--gray);
+  line-height: 1.8;
+}
+.login-hints p { margin-bottom: 0.3rem; }
+.login-hints code {
+  font-family: var(--font-mono);
+  color: var(--white-dim);
+  font-size: 0.72rem;
+}
+
+/* ─── AUTH SCREEN (registro) ───────────────────────── */
+.auth-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+.auth-bg-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.auth-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,10,0.85);
+}
+
+#screen-register {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.auth-wrap {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Phone input */
+.phone-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--black-3);
+  border: 1px solid var(--black-5);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.phone-wrap:focus-within { border-color: var(--gold); }
+
+.phone-prefix {
+  padding: 0.75rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--white-dim);
+  border-right: 1px solid var(--black-5);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.phone-wrap input {
+  border: none;
+  background: transparent;
+  flex: 1;
+}
+.phone-wrap input:focus { border: none; box-shadow: none; outline: none; }
+
+/* WhatsApp verify */
+.whatsapp-verify {
+  background: rgba(37,211,102,0.06);
+  border: 1px solid rgba(37,211,102,0.2);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.wa-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.whatsapp-verify p {
+  font-size: 0.82rem;
+  color: var(--white-dim);
+  line-height: 1.5;
+}
+
+.wa-confirm-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #4ade80;
+  margin-top: -0.5rem;
+}
+
+/* ─── CLIENT: barber cards grandes ─────────────────── */
+.barber-cards-big {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.barber-big-card {
+  background: var(--black-3);
+  border: 1px solid var(--black-5);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.barber-big-card:hover,
+.barber-big-card.selected {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-gold);
+}
+
+.barber-big-img {
+  width: 100%;
+  height: 130px;
+  background: var(--black-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  overflow: hidden;
+}
+
+.barber-big-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.barber-big-works {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.barber-big-works img,
+.barber-big-works .work-ph {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--black-5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  color: var(--gray);
+}
+
+.barber-big-info {
+  padding: 0.85rem;
+}
+
+.barber-big-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 0.2rem;
+}
+
+.barber-big-ig {
+  font-size: 0.72rem;
+  color: var(--gold-dim);
+  margin-bottom: 0.15rem;
+}
+
+.barber-big-esp {
+  font-size: 0.72rem;
+  color: var(--gray-light);
+}
+
+.btn-turno-small {
+  margin: 0 0.85rem 0.85rem;
+  padding: 0.5rem;
+  background: var(--gold);
+  color: var(--black);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  width: calc(100% - 1.7rem);
+}
+.btn-turno-small:hover { background: var(--gold-light); }
+
+/* ─── MODAL BARBERO (landing) ──────────────────────── */
+.modal-barber-view {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  z-index: 300;
+  background: var(--black-2);
+  border: 1px solid var(--black-5);
+  border-radius: var(--radius-lg);
+  width: min(520px, 94vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+  animation: modalIn 0.3s cubic-bezier(0.34,1.2,0.64,1);
+}
+
+.mbv-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.75rem 1.75rem 1rem;
+}
+
+.mbv-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--black-4);
+  border: 2px solid var(--gold-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.mbv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.mbv-info h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
+}
+
+.mbv-info p { font-size: 0.8rem; color: var(--gray-light); }
+.mbv-esp { color: var(--gold-dim) !important; margin-top: 0.25rem; }
+
+.mbv-works {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 0 1.75rem 1.25rem;
+}
+
+.mbv-works img,
+.mbv-work-ph {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--black-4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: var(--gray);
+}
+
+.mbv-actions {
+  padding: 0 1.75rem 1.75rem;
+}
+
+/* ─── RESPONSIVE LANDING ───────────────────────────── */
+@media (max-width: 768px) {
+  .landing-header { padding: 1.25rem 1.5rem; }
+  .landing-main { padding: 1.5rem 1.5rem 1rem; }
+  .barbers-strip { padding: 0 1.5rem 1.5rem; }
+  .slide-indicators { right: 1.5rem; bottom: 8rem; }
+  .modal-login { right: 50%; transform: translate(50%, -50%); }
+  .landing-title { font-size: clamp(3rem, 12vw, 5rem); }
+}
+
+@media (max-width: 480px) {
+  .landing-header-actions .btn-outline-gold { display: none; }
+  .barber-cards-big { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<script src="app.js"></script>
+
+<script>
+// ══════════════════════════════════════════════════════
+// LANDING: Slideshow
+// ══════════════════════════════════════════════════════
+let currentSlide = 0;
+const slides = document.querySelectorAll('.bg-slide');
+const dots   = document.querySelectorAll('.dot');
+
+function goSlide(n) {
+  slides[currentSlide].classList.remove('active');
+  dots[currentSlide].classList.remove('active');
+  currentSlide = n;
+  slides[currentSlide].classList.add('active');
+  dots[currentSlide].classList.add('active');
+}
+
+setInterval(() => {
+  goSlide((currentSlide + 1) % slides.length);
+}, 5000);
+
+// ══════════════════════════════════════════════════════
+// LANDING: Barberos strip (usa datos de app.js)
+// ══════════════════════════════════════════════════════
+function renderBarbersStrip() {
+  const track = document.getElementById('barbers-strip-track');
+  if (!track) return;
+  const barbers = (typeof getBarbersData === 'function') ? getBarbersData() : [];
+  if (!barbers.length) {
+    track.innerHTML = '<p style="color:var(--gray);font-size:0.8rem">No hay barberos registrados aún.</p>';
+    return;
+  }
+  track.innerHTML = barbers.map(b => `
+    <div class="strip-barber-card" onclick="openBarberModal('${b.user}')">
+      <div class="strip-barber-img">
+        ${b.avatar ? `<img src="${b.avatar}" alt="${b.name}" />` : '✂'}
+      </div>
+      <div class="strip-barber-info">
+        <div class="strip-barber-name">${b.name}</div>
+        <div class="strip-barber-ig">${b.ig || ''}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// MODAL LOGIN
+// ══════════════════════════════════════════════════════
+function openLoginModal() {
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('modal-login').classList.remove('hidden');
+  setTimeout(() => document.getElementById('login-user').focus(), 100);
+}
+
+function closeLoginModal() {
+  document.getElementById('login-overlay').classList.add('hidden');
+  document.getElementById('modal-login').classList.add('hidden');
+}
+
+function togglePass() {
+  const inp = document.getElementById('login-pass');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+
+  errEl.classList.add('hidden');
+
+  if (!user || !pass) {
+    errEl.textContent = 'Completá usuario y contraseña';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  // Delegar al sistema de app.js
+  if (typeof loginUnified === 'function') {
+    const result = loginUnified(user, pass);
+    if (!result) {
+      errEl.classList.remove('hidden');
+    } else {
+      closeLoginModal();
+    }
+  } else {
+    // Fallback demo hardcodeado
+    if (user === 'admin' && pass === 'admin123') {
+      closeLoginModal();
+      showScreen('screen-admin');
+    } else if (pass === 'barber1') {
+      closeLoginModal();
+      showScreen('screen-barber');
+    } else if (pass === '1234') {
+      closeLoginModal();
+      showScreen('screen-client-home');
+    } else {
+      errEl.classList.remove('hidden');
+    }
+  }
+}
+
+// Enter en los campos de login
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('login-user').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-pass').focus();
+});
+
+// ══════════════════════════════════════════════════════
+// MODAL BARBERO (landing)
+// ══════════════════════════════════════════════════════
+let selectedBarberFromModal = null;
+
+function openBarberModal(barberUser) {
+  const barbers = (typeof getBarbersData === 'function') ? getBarbersData() : [];
+  const b = barbers.find(x => x.user === barberUser);
+  if (!b) return;
+
+  selectedBarberFromModal = barberUser;
+
+  document.getElementById('mbv-name').textContent = b.name;
+  document.getElementById('mbv-ig').textContent = b.ig || '';
+  document.getElementById('mbv-esp').textContent = b.especialidad || '';
+
+  const avatar = document.getElementById('mbv-avatar');
+  avatar.innerHTML = b.avatar ? `<img src="${b.avatar}" alt="${b.name}">` : '✂';
+
+  const worksEl = document.getElementById('mbv-works');
+  const works = b.works || [];
+  if (works.length) {
+    worksEl.innerHTML = works.slice(0, 6).map(w =>
+      `<img src="${w}" alt="trabajo">`
+    ).join('');
+  } else {
+    worksEl.innerHTML = '<div class="mbv-work-ph" style="grid-column:1/-1;padding:2rem;text-align:center">Sin trabajos subidos aún</div>';
+  }
+
+  document.getElementById('barber-modal-overlay').classList.remove('hidden');
+  document.getElementById('modal-barber-view').classList.remove('hidden');
+}
+
+function closeBarberModal() {
+  document.getElementById('barber-modal-overlay').classList.add('hidden');
+  document.getElementById('modal-barber-view').classList.add('hidden');
+}
+
+function goBookFromBarber() {
+  closeBarberModal();
+  // Primero verificar login
+  if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
+    openLoginModal();
+    return;
+  }
+  showScreen('screen-client-home');
+  // Pre-seleccionar barbero si app.js lo soporta
+  if (selectedBarberFromModal && typeof preselectBarber === 'function') {
+    preselectBarber(selectedBarberFromModal);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// WhatsApp verification (demo)
+// ══════════════════════════════════════════════════════
+function sendWACode() {
+  const phone = document.getElementById('reg-phone').value;
+  if (!phone) return;
+  showToast('📱 Código enviado por WhatsApp');
+}
+
+// Mostrar bloque WA al completar teléfono
+document.getElementById('reg-phone').addEventListener('blur', function() {
+  if (this.value.length >= 8) {
+    document.getElementById('wa-verify-block').classList.remove('hidden');
+  }
+});
+
+// Init strip cuando carga la página
+window.addEventListener('load', () => {
+  renderBarbersStrip();
+});
+</script>
+
+</body>
+</html>
